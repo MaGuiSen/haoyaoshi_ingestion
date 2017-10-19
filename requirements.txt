@@ -1,0 +1,6 @@
+scrapy
+apscheduler
+csscompressor
+demjson
+peewee
+PIL #图片处理
