@@ -135,7 +135,8 @@ class HaoYaoShiSpider(BaseSpider):
                 types = []
             types = json.dumps(types, ensure_ascii=False)
 
-            title = response.xpath('//*[@class="title micText"]//text()').extract_first('').strip()
+            title = response.xpath('//*[@class="title micText"]//text()').extract()
+            title = ''.join(title).strip()
             proPrice = response.xpath('//*[@class="proPrice"]//text()').extract()
             proPrice = ''.join(proPrice)
             oldPrice = response.xpath('//*[@class="oldPrice"]//text()').extract()
