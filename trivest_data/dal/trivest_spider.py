@@ -64,10 +64,15 @@ class HaoYaoShiDetail(BaseModel):
     old_price = CharField(null=True)
     pd_base_info = CharField(null=True)
     pd_detail_info = CharField(null=True)
+    pd_detail_info_parsed = CharField(null=True)
     pd_specification = CharField(null=True)
+    remark = CharField(null=True)
 
     class Meta:
         db_table = 'haoyaoshi_detail'
+
+if __name__ == '__main__':
+    a = {}
 
 
 

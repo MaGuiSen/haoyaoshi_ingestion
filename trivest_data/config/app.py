@@ -9,7 +9,7 @@ from util.configutils import read_config
 
 __logger = bas_console_logger("app")
 
-env = 'dev_local'  # dev_local dev_inner
+env = 'dev_inner'  # dev_local dev_inner
 abs_path = os.path.dirname(__file__) + os.sep + 'config_' + env + '.ini'
 
 config = read_config(abs_path)
