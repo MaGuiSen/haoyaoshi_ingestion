@@ -6,6 +6,7 @@ import scrapy
 
 from base_spider import BaseSpider
 from trivest_data.dal.StatusDao import StatusDao
+from util import NetworkUtil
 from util import TimerUtil
 
 
@@ -13,7 +14,7 @@ class HaoYaoShiSpider(BaseSpider):
     """
     好药师
     """
-    # download_delay = 2.5
+    download_delay = 2.5
     handle_httpstatus_list = [204, 206, 301, 400, 403, 404, 500] # 错误码中302是处理重定向的，可以不写，因为写了可能导致404无法回掉，写在外部
     name = 'hao_yao_shi'
     custom_settings = {
@@ -94,14 +95,14 @@ class HaoYaoShiSpider(BaseSpider):
     def parseResult(self, response):
         status = response.status
         haoYaoShiId = response.meta['haoYaoShiId']
-        print status
+        self.logWarn(u'haoyaoshi_id: %d 请求状态%d %s' % (haoYaoShiId, status, response.url))
         if status == 404:
             self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_no_source)
-            self.logWarn(u'好药师id:%s :404' % haoYaoShiId)
             return
         if status == 403:
             self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_be_forbid)
-            self.logWarn(u'访问过多被禁止%s :' % haoYaoShiId)
+            NetworkUtil.getNewIp()
+            TimerUtil.sleep(60)
             return
         # 判断使用哪种解析方式, url是最终的url,重定向之后
         url = response.url
