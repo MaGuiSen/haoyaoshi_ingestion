@@ -13,6 +13,7 @@ class StatusDao(object):
     Status_no_complete_data = 'no_complete_data'
     Status_no_parse_method = 'no_parse_method'
     Status_dont_need_parse = 'dont_need_parse'
+    Status_be_forbid = 'be_forbid'
 
     def __init__(self):
         self.Table = getTableByName('haoyaoshi_status')
@@ -20,7 +21,7 @@ class StatusDao(object):
     def updateStatus(self, haoyaoshiId, status):
         """
         存在更改，不存在则新增
-        :param status: start_request, save_success, save_fail, 404, no_complete_data, no_parse_method, dont_need_parse
+        :param status: be_forbid, start_request, save_success, save_fail, 404, no_complete_data, no_parse_method, dont_need_parse
         :return:
         """
         pass
@@ -47,6 +48,7 @@ class StatusDao(object):
                            self.Status_dont_need_parse,
                            self.Status_no_complete_data,
                            self.Status_no_parse_method,
+                           self.Status_be_forbid
                            ]
             count = self.Table.select()\
                 .where(self.Table.haoyaoshi_id == haoyaoshiId, ~(self.Table.status << existStatus))\
@@ -64,6 +66,7 @@ class StatusDao(object):
                            self.Status_dont_need_parse,
                            self.Status_no_complete_data,
                            self.Status_no_parse_method,
+                           self.Status_be_forbid
                            ]
             results = self.Table.select().where(~(self.Table.status << existStatus)).order_by(self.Table.haoyaoshi_id.asc())
             if len(results):
@@ -82,6 +85,7 @@ class StatusDao(object):
                            self.Status_dont_need_parse,
                            self.Status_no_complete_data,
                            self.Status_no_parse_method,
+                           self.Status_be_forbid
                            ]
             results = self.Table.select().where(~(self.Table.status << existStatus))\
                 .order_by(self.Table.haoyaoshi_id.asc())\
@@ -92,5 +96,20 @@ class StatusDao(object):
             LogDao.warn(str(e), belong_to='getReCatchList')
             return []
 
+    def getStartCatchId(self):
+        """
+        获取开始抓取的ID，好药师的id
+        :return:
+        """
+        pass
+        results = self.Table.select(self.Table.haoyaoshi_id).order_by(self.Table.haoyaoshi_id.desc()).paginate(1, 1)
+        if results:
+            return results[0].haoyaoshi_id+1
+        else:
+            return 0
+
 if __name__ == '__main__':
     pass
+    a = [1]
+    if a:
+        print 1

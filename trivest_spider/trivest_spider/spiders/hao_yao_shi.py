@@ -13,10 +13,10 @@ class HaoYaoShiSpider(BaseSpider):
     """
     好药师
     """
+    # download_delay = 2.5
     handle_httpstatus_list = [204, 206, 301, 400, 403, 404, 500] # 错误码中302是处理重定向的，可以不写，因为写了可能导致404无法回掉，写在外部
     name = 'hao_yao_shi'
     custom_settings = {
-        'download_delay': 2.5,
         'ITEM_PIPELINES': {
             'trivest_spider.pipelines.HaoYaoShiPipeline': 50,
         },
@@ -38,18 +38,16 @@ class HaoYaoShiSpider(BaseSpider):
             self.logWarn(u'环境不可行，退出当前抓取')
             return
         # # 404:27 重定向：32532
-        # url = 'http://www.ehaoyao.com/product-%d.html' % 219
-        # self.statusDao.updateStatus(219, self.statusDao.Status_start_request)
+        # url = 'http://www.ehaoyao.com/product-%d.html' % 188
+        # self.statusDao.updateStatus(188, self.statusDao.Status_start_request)
         # self.logInfo(u"开始抓取列表：" + url)
         # yield scrapy.Request(url=url,
         #                      meta={
         #                          'request_type': self.name + '_detail',
-        #                          'haoYaoShiId': 219
+        #                          'haoYaoShiId': 188
         #                      },
         #                      callback=self.parseResult, dont_filter=True)
         # return
-        # 获取从哪一个id开始
-        lastStartId = 0
         pageIndex = 1
         while True:
             reCatchList = self.statusDao.getReCatchList(pageIndex)
@@ -59,9 +57,6 @@ class HaoYaoShiSpider(BaseSpider):
             print 'pageIndex', pageIndex
             for index, item in enumerate(reCatchList):
                 haoYaoShiId = item.haoyaoshi_id
-                if index == len(reCatchList) - 1:
-                    lastStartId = haoYaoShiId
-
                 # 更新状态
                 self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_start_request)
 
@@ -77,10 +72,13 @@ class HaoYaoShiSpider(BaseSpider):
 
             pageIndex += 1
 
+        # 获取从哪一个id开始
+        lastStartId = self.statusDao.getStartCatchId()
         maxHaoYaoShiId = 100000
-        if lastStartId + 1 > maxHaoYaoShiId:
+        if lastStartId > maxHaoYaoShiId:
             return
-        for haoYaoShiId in range(lastStartId + 1, maxHaoYaoShiId):
+
+        for haoYaoShiId in range(lastStartId, maxHaoYaoShiId):
             # 更新状态
             self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_start_request)
 
@@ -96,27 +94,27 @@ class HaoYaoShiSpider(BaseSpider):
     def parseResult(self, response):
         status = response.status
         haoYaoShiId = response.meta['haoYaoShiId']
+        print status
         if status == 404:
             self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_no_source)
             self.logWarn(u'好药师id:%s :404' % haoYaoShiId)
             return
-        if False:
-            self.logWarn(u'访问过多被禁止：')
+        if status == 403:
+            self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_be_forbid)
+            self.logWarn(u'访问过多被禁止%s :' % haoYaoShiId)
             return
         # 判断使用哪种解析方式, url是最终的url,重定向之后
         url = response.url
-        contentItem = None
         if 'http://www.ehaoyao.com/product' in url:
             contentItem = self.parseDetail1(response)
+            if contentItem:
+                return contentItem
         elif 'http://www.ehaoyao.us/goods.php' in url:
             # 更改状态：不需要处理
             self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_dont_need_parse)
         else:
             # 更改状态：没有解析方法
             self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_no_parse_method)
-
-        if contentItem:
-            return contentItem
 
     def parseDetail1(self, response):
         haoYaoShiId = response.meta['haoYaoShiId']
@@ -137,6 +135,11 @@ class HaoYaoShiSpider(BaseSpider):
 
             title = response.xpath('//*[@class="title micText"]//text()').extract()
             title = ''.join(title).strip()
+
+            if not title:
+                self.statusDao.updateStatus(haoYaoShiId, self.statusDao.Status_no_complete_data)
+                return
+
             proPrice = response.xpath('//*[@class="proPrice"]//text()').extract()
             proPrice = ''.join(proPrice)
             oldPrice = response.xpath('//*[@class="oldPrice"]//text()').extract()
@@ -219,7 +222,7 @@ class HaoYaoShiSpider(BaseSpider):
                             return json.dumps(json.loads(result.content).get('data', {}).get('specificInfo', ''), ensure_ascii=False)
                         return ''
             except Exception as e:
-                self.logWarn(str(e))
+                self.logWarn('downloadSpecific:' + str(e))
                 return ''
 
             count += 1
