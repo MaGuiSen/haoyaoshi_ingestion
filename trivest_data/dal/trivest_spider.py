@@ -31,6 +31,9 @@ def getTableByName(tableName):
     Tables = {
         'haoyaoshi_status': HaoYaoShiStatus,
         'haoyaoshi_detail': HaoYaoShiDetail,
+        'haoyaoshi_detail_standard': HaoYaoShiDetailStandard,
+        'haoyaoshi_type_link': HaoYaoShiTypeLink,
+        'haoyaoshi_type': HaoYaoShiType,
     }
     return Tables[tableName]
 
@@ -42,6 +45,22 @@ class UnknownField(object):
 class BaseModel(Model):
     class Meta:
         database = database
+
+
+class HaoYaoShiTypeLink(BaseModel):
+    type_id = IntegerField(null=True)
+    haoyaoshi_id = IntegerField(null=True)
+
+    class Meta:
+        db_table = 'haoyaoshi_type_link'
+
+
+class HaoYaoShiType(BaseModel):
+    name = CharField(null=True)
+    parent_id = IntegerField(null=True)
+
+    class Meta:
+        db_table = 'haoyaoshi_type'
 
 
 class HaoYaoShiStatus(BaseModel):
@@ -70,6 +89,27 @@ class HaoYaoShiDetail(BaseModel):
 
     class Meta:
         db_table = 'haoyaoshi_detail'
+
+
+class HaoYaoShiDetailStandard(BaseModel):
+    haoyaoshi_id = IntegerField(null=True)
+    title = CharField(null=True)
+    remark = CharField(null=True)
+    img_urls = TextField(null=True)
+    huohao = CharField(null=True)
+    create_factory = CharField(null=True)
+    pro_price = FloatField(null=True)
+    old_price = FloatField(null=True)
+    pro_price_show = CharField(null=True)
+    old_price_show = CharField(null=True)
+    common_name = CharField(null=True)
+    standard = CharField(null=True)
+    props = TextField(null=True)
+    specification = TextField(null=True)
+    update_time = DateTimeField(null=True)
+
+    class Meta:
+        db_table = 'haoyaoshi_detail_standard'
 
 if __name__ == '__main__':
     a = {}

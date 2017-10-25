@@ -76,6 +76,7 @@ class HaoYaoShiSpider(BaseSpider):
         # 获取从哪一个id开始
         lastStartId = self.statusDao.getStartCatchId()
         maxHaoYaoShiId = 100000
+        # 现在抓到77491
         if lastStartId > maxHaoYaoShiId:
             return
 
