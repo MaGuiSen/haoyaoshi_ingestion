@@ -34,6 +34,7 @@ def getTableByName(tableName):
         'haoyaoshi_detail_standard': HaoYaoShiDetailStandard,
         'haoyaoshi_type_link': HaoYaoShiTypeLink,
         'haoyaoshi_type': HaoYaoShiType,
+        'haoyaoshi_prop_key': HaoYaoShiPropKey
     }
     return Tables[tableName]
 
@@ -46,6 +47,14 @@ class BaseModel(Model):
     class Meta:
         database = database
 
+
+class HaoYaoShiPropKey(BaseModel):
+    name = CharField(null=True)
+    code = CharField(null=True)
+    pinyin = CharField(null=True)
+
+    class Meta:
+        db_table = 'haoyaoshi_prop_key'
 
 class HaoYaoShiTypeLink(BaseModel):
     type_id = IntegerField(null=True)
@@ -103,7 +112,7 @@ class HaoYaoShiDetailStandard(BaseModel):
     pro_price_show = CharField(null=True)
     old_price_show = CharField(null=True)
     common_name = CharField(null=True)
-    standard = CharField(null=True)
+    guige = CharField(null=True)
     props = TextField(null=True)
     specification = TextField(null=True)
     update_time = DateTimeField(null=True)
