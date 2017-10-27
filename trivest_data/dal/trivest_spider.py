@@ -26,6 +26,12 @@ database = MyRetryDB(__mysql_config['database'],
 database.execute_sql("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;")
 
 
+# 批量插入
+def insertMany(operate):
+    with database.atomic():
+        operate()
+
+
 # TODO...新增一个表的对象，就在此处添加一个键值对，指定数据库名称和类的对应关系
 def getTableByName(tableName):
     Tables = {
@@ -52,9 +58,11 @@ class HaoYaoShiPropKey(BaseModel):
     name = CharField(null=True)
     code = CharField(null=True)
     pinyin = CharField(null=True)
+    source = CharField(null=True)
 
     class Meta:
         db_table = 'haoyaoshi_prop_key'
+
 
 class HaoYaoShiTypeLink(BaseModel):
     type_id = IntegerField(null=True)
