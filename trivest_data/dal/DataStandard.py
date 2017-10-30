@@ -30,11 +30,8 @@ def operate(pageIndex):
         saveAllPropKey()
         return True
     for item in dataList:
-        # 得到type
-        typeListStr = item.types
-
         # 已经处理了
-        # operateType(haoyaoshiId, typeListStr)
+        # operateType(item)
 
         targetObj = {}
         # 已经处理了
@@ -46,7 +43,8 @@ def operate(pageIndex):
         targetObj['update_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         targetObj['img_urls'] = item.img_urls
         targetObj['remark'] = item.remark
-
+        targetObj['haoyaoshi_id'] = item.haoyaoshi_id
+        getTableByName('haoyaoshi_detail_standard').create(**targetObj)
         pass
 
 
@@ -91,7 +89,7 @@ def getMainProp(targetObj, item):
         def run(obj):
             value = ''
             for key in keyList:
-                value = obj.get(key)
+                value = obj.get(key, '')
                 if value:
                     break
             return value
@@ -103,10 +101,10 @@ def getMainProp(targetObj, item):
                 break
         return value
 
-    guige = getValue([u'规格', u'商品规格'])
-    huohao = getValue([u'货号'])
-    create_factory = getValue([u'生产企业', u'生产厂家'])
-    common_name = getValue([u'通用名称', u'通用名'])
+    guige = getValue([u'规格', u'商品规格']).strip()
+    huohao = getValue([u'货号']).strip()
+    create_factory = getValue([u'生产企业', u'生产厂家']).strip()
+    common_name = getValue([u'通用名称', u'通用名']).strip()
 
     # # 得到新的对象，不包含对应属性的对象
     # def delKey(obj, delKeyList):
@@ -131,7 +129,7 @@ def getMainProp(targetObj, item):
     # specificationObj, detailInfoObj
     print guige, huohao, create_factory, common_name
     targetObj['props'] = json.dumps(detailInfoObj, ensure_ascii=False)
-    targetObj['specification'] = json.dumps(detailInfoObj, ensure_ascii=False)
+    targetObj['specification'] = json.dumps(specificationObj, ensure_ascii=False)
     targetObj['guige'] = guige
     targetObj['huohao'] = huohao
     targetObj['create_factory'] = create_factory
@@ -276,7 +274,9 @@ def saveTypeLink(haoyaoshiId, typeId):
 
 
 # 处理类型，将类型存入类型表，并建立关联
-def operateType(haoyaoshiId, typeListStr):
+def operateType(item):
+    typeListStr = item.types
+    haoyaoshiId = item.haoyaoshi_id
     print typeListStr
     typeList = json.loads(typeListStr)
     parentId = -1
@@ -291,6 +291,7 @@ def operateType(haoyaoshiId, typeListStr):
 
 if __name__ == '__main__':
     circleRun(operate)
+    # print float('1.1')
     # baseInfoObj = {u"商品规格": u"10只"}
     # detailInfoObj = {u"货号": u"货号2", u"商品规格": "22222", u'生产厂家': 'das'}
     #
